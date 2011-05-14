@@ -7,6 +7,8 @@
     </configurations>
     <dependencies>
       <dependency org="org.openstreetmap.osmosis" name="osmosis-core" rev="0.39" conf="compile->default" />
+      <dependency org="org.openstreetmap.osmosis" name="osmosis-tagfilter" rev="0.39" conf="test->default" />
+      <dependency org="org.openstreetmap.osmosis" name="osmosis-xml" rev="0.39" conf="test->default" />
       <dependency org="junit" name="junit" rev="4.8.2" conf="test->default" />
     </dependencies>
 </ivy-module>

@@ -11,5 +11,8 @@
 	<classpathentry kind="lib" path="lib/test/stax2-api-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/test/woodstox-core-lgpl-4.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/test/xercesImpl-2.9.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/test/osmosis-tagfilter-0.39.jar"/>
+	<classpathentry kind="lib" path="lib/test/osmosis-xml-0.39.jar"/>
 	<classpathentry kind="output" path="eclipse"/>
 </classpath>

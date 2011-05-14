@@ -8,6 +8,11 @@ import org.openstreetmap.osmosis.core.plugin.PluginLoader;
 
 import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.FastUsedNodeFilterFactory;
 
+/**
+ * Loader for the fast used filter plugin.
+ * 
+ * @author Igor Podolskiy
+ */
 public class FastUsedPluginLoader implements PluginLoader {
 
 	@Override

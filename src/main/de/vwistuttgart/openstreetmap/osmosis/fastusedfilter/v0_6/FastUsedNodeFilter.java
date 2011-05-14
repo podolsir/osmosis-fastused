@@ -42,8 +42,8 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 	private DataPostbox<EntityContainer> nodePostbox;
 	private DataPostbox<EntityContainer> wayRelationPostbox;
 	
-	private Sink nodeSink = new DataPostboxSink(nodePostbox);
-	private Sink wayRelationSink = new DataPostboxSink(wayRelationPostbox);
+	private Sink nodeSink;
+	private Sink wayRelationSink;
 	
 	private IdTracker idTracker;
 	
@@ -71,6 +71,8 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 
 		nodePostbox = new DataPostbox<EntityContainer>(bufferCapacity);
 		wayRelationPostbox = new DataPostbox<EntityContainer>(bufferCapacity);
+		nodeSink = new DataPostboxSink(nodePostbox);
+		wayRelationSink = new DataPostboxSink(wayRelationPostbox);
 	}
 	
 	@Override

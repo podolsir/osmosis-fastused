@@ -100,26 +100,13 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 
 	@Override
 	public void run() {	
-		
-		// Bound special handling
-		if (wayRelationPostbox.hasNext()) {
-			EntityContainer entityContainer = wayRelationPostbox.getNext();
-			if (entityContainer.getEntity().getType() == EntityType.Bound) {
-				// pass on the bound from the way/relation source
-				sink.process(entityContainer);
-			} else {
-				// process normally
-				processMaybeWay(entityContainer);
-				processMaybeRelation(entityContainer);
-			}
-		}
-		
 		// Collect all node ids we need from ways and relations 
 		// while holding off nodes.
 		while (wayRelationPostbox.hasNext()) {
 			EntityContainer entityContainer = wayRelationPostbox.getNext();
 			processMaybeWay(entityContainer);
 			processMaybeRelation(entityContainer);
+			processMaybeBound(entityContainer);
 		}
 		
 		// Process all the nodes and only pass on what we need.
@@ -129,6 +116,14 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		}
 		
 		sink.complete();
+	}
+
+	private void processMaybeBound(EntityContainer entityContainer) {
+		if (entityContainer.getEntity().getType() != EntityType.Bound) {
+			// We only care about bounds.
+			return;
+		}
+		sink.process(entityContainer);
 	}
 
 	private void processMaybeNode(EntityContainer entityContainer) {

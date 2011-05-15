@@ -7,16 +7,18 @@ import java.util.List;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 
+
 /**
- * Mock object for inspecting the resulting entities after passing through a pipeline task.
+ * Mock object for inspecting the resulting entities after passing through a
+ * pipeline task.
  * 
  * @author Karl Newman
  */
 public class SinkEntityInspector implements Sink {
 
 	private List<EntityContainer> processedEntities;
-	
-	
+
+
 	/**
 	 * Creates a new instance.
 	 */

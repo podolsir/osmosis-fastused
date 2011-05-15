@@ -13,8 +13,8 @@ import org.openstreetmap.osmosis.core.task.v0_6.Sink;
  */
 public class DataPostboxSink implements Sink {
 	private DataPostbox<EntityContainer> postbox;
-	
-	
+
+
 	/**
 	 * Creates a new instance.
 	 * 

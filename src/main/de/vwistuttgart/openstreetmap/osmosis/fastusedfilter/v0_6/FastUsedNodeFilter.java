@@ -19,6 +19,7 @@ import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 
 import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.impl.DataPostboxSink;
 
+
 /**
  * Restricts output of nodes to those that are used in ways and relations
  * without an intermediate store.
@@ -36,28 +37,31 @@ import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.impl.DataPostbo
  * @author Igor Podolskiy
  */
 public class FastUsedNodeFilter implements MultiSinkRunnableSource {
-	
+
 	private Sink sink;
-	
+
 	private DataPostbox<EntityContainer> nodePostbox;
 	private DataPostbox<EntityContainer> wayRelationPostbox;
-	
+
 	private Sink nodeSink;
 	private Sink wayRelationSink;
-	
+
 	private IdTracker idTracker;
-	
+
+
 	/**
 	 * Creates a new instance.
 	 * 
-	 * @param idTrackerType the ID tracker type to use
-	 * @param bufferCapacity the capacity to use for the input buffers
+	 * @param idTrackerType
+	 *            the ID tracker type to use
+	 * @param bufferCapacity
+	 *            the capacity to use for the input buffers
 	 */
 	public FastUsedNodeFilter(IdTrackerType idTrackerType, int bufferCapacity) {
-		
+
 		switch (idTrackerType) {
 		case IdList:
-			idTracker =	new ListIdTracker();
+			idTracker = new ListIdTracker();
 			break;
 		case Dynamic:
 			idTracker = new DynamicIdTracker();
@@ -65,8 +69,7 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		case BitSet:
 			idTracker = new BitSetIdTracker();
 		default:
-			throw new OsmosisRuntimeException("Invalid ID tracker type " 
-					+ idTrackerType.toString() + " requested");
+			throw new OsmosisRuntimeException("Invalid ID tracker type " + idTrackerType.toString() + " requested");
 		}
 
 		nodePostbox = new DataPostbox<EntityContainer>(bufferCapacity);
@@ -74,7 +77,8 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		nodeSink = new DataPostboxSink(nodePostbox);
 		wayRelationSink = new DataPostboxSink(wayRelationPostbox);
 	}
-	
+
+
 	@Override
 	public Sink getSink(int instance) {
 		switch (instance) {
@@ -83,24 +87,26 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		case 1:
 			return wayRelationSink;
 		default:
-			throw new OsmosisRuntimeException("Invalid sink instance "
-					+ instance + " requested.");
+			throw new OsmosisRuntimeException("Invalid sink instance " + instance + " requested.");
 		}
 	}
+
 
 	@Override
 	public int getSinkCount() {
 		return 2;
 	}
 
+
 	@Override
 	public void setSink(Sink sink) {
 		this.sink = sink;
 	}
 
+
 	@Override
-	public void run() {	
-		// Collect all node ids we need from ways and relations 
+	public void run() {
+		// Collect all node ids we need from ways and relations
 		// while holding off nodes.
 		while (wayRelationPostbox.hasNext()) {
 			EntityContainer entityContainer = wayRelationPostbox.getNext();
@@ -108,15 +114,16 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 			processMaybeRelation(entityContainer);
 			processMaybeBound(entityContainer);
 		}
-		
+
 		// Process all the nodes and only pass on what we need.
 		while (nodePostbox.hasNext()) {
 			EntityContainer entityContainer = nodePostbox.getNext();
 			processMaybeNode(entityContainer);
 		}
-		
+
 		sink.complete();
 	}
+
 
 	private void processMaybeBound(EntityContainer entityContainer) {
 		if (entityContainer.getEntity().getType() != EntityType.Bound) {
@@ -126,16 +133,18 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		sink.process(entityContainer);
 	}
 
+
 	private void processMaybeNode(EntityContainer entityContainer) {
 		if (entityContainer.getEntity().getType() != EntityType.Node) {
 			// We only care about nodes.
 			return;
 		}
-		
+
 		if (idTracker.get(entityContainer.getEntity().getId())) {
 			sink.process(entityContainer);
 		}
 	}
+
 
 	private void processMaybeWay(EntityContainer entityContainer) {
 		if (entityContainer.getEntity().getType() != EntityType.Way) {
@@ -150,7 +159,8 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		// pass on the way
 		sink.process(entityContainer);
 	}
-	
+
+
 	private void processMaybeRelation(EntityContainer entityContainer) {
 		if (entityContainer.getEntity().getType() != EntityType.Relation) {
 			// We only care about relations.

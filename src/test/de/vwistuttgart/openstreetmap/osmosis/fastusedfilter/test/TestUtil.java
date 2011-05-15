@@ -6,6 +6,10 @@ import java.io.InputStream;
 
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
+import org.openstreetmap.osmosis.core.task.v0_6.MultiSinkRunnableSource;
+import org.openstreetmap.osmosis.core.task.v0_6.RunnableSource;
+import org.openstreetmap.osmosis.core.task.v0_6.SinkSource;
+import org.openstreetmap.osmosis.test.task.v0_6.SinkEntityInspector;
 
 import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.FastUsedNodeFilterTest;
 
@@ -45,5 +49,29 @@ public class TestUtil {
 		}
 	
 		Assert.assertEquals(expected, count);
+	}
+
+	public static SinkEntityInspector runFastUsedFilter(MultiSinkRunnableSource multiFilter, RunnableSource nodeSource, RunnableSource waySource,
+			SinkSource wayFilter) throws Exception {
+	
+		SinkEntityInspector inspector = new SinkEntityInspector();
+	
+		nodeSource.setSink(multiFilter.getSink(0));
+		waySource.setSink(wayFilter);
+		wayFilter.setSink(multiFilter.getSink(1));
+		multiFilter.setSink(inspector);
+	
+		Thread readerThread1 = new Thread(nodeSource);
+		Thread readerThread2 = new Thread(waySource);
+		Thread multiFilterThread = new Thread(multiFilter);
+	
+		readerThread1.start();
+		readerThread2.start();
+		multiFilterThread.start();
+		multiFilterThread.join();
+		readerThread1.join();
+		readerThread2.join();
+	
+		return inspector;
 	}
 }

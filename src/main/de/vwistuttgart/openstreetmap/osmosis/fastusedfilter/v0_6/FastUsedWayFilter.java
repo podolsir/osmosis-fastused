@@ -124,7 +124,7 @@ public class FastUsedWayFilter implements MultiSinkRunnableSource {
 
 
 	private void processMaybeNode(EntityContainer entityContainer) {
-		if (entityContainer.getEntity().getType() != EntityType.Bound) {
+		if (entityContainer.getEntity().getType() != EntityType.Node) {
 			// We only care about nodes.
 			return;
 		}

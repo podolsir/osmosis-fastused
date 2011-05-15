@@ -31,7 +31,7 @@ import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.impl.DataPostbo
  * 
  * Note that the ways and nodes need to come from two different <i>sources</i>
  * and not only from two different <i>threads</i>. If both node and way/relation
- * data ultimately comes from the same source, <b>this task will deadlock</b>
+ * data ultimately come from the same source, <b>this task will deadlock</b>
  * except for some lucky cases.
  * 
  * @author Igor Podolskiy

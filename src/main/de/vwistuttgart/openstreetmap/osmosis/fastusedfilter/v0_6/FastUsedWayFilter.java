@@ -19,17 +19,17 @@ import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.impl.DataPostbo
 
 
 /**
- * Restricts output of nodes to those that are used in ways and relations
+ * Restricts output of ways to those that are used in relations
  * without an intermediate store.
  * 
  * This implementation is basically a merge with an id tracker. It takes the
- * ways and relations from one input stream, records the required node IDs, then
- * takes the nodes from the other input stream and filters them with the
+ * nodes and relations from one input stream, records the required way IDs, then
+ * takes the ways from the other input stream and filters them with the
  * recorded data.
  * 
- * Note that the ways and nodes need to come from two different <i>sources</i>
- * and not only from two different <i>threads</i>. If both node and way/relation
- * data ultimately comes from the same source, <b>this task will deadlock</b>
+ * Note that the relations and ways need to come from two different <i>sources</i>
+ * and not only from two different <i>threads</i>. If both way and relation
+ * data ultimately come from the same source, <b>this task will deadlock</b>
  * except for some lucky cases.
  * 
  * @author Igor Podolskiy

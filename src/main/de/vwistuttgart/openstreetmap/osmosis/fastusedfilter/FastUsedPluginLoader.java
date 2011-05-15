@@ -7,6 +7,7 @@ import org.openstreetmap.osmosis.core.pipeline.common.TaskManagerFactory;
 import org.openstreetmap.osmosis.core.plugin.PluginLoader;
 
 import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.FastUsedNodeFilterFactory;
+import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.FastUsedWayFilterFactory;
 
 
 /**
@@ -25,6 +26,12 @@ public class FastUsedPluginLoader implements PluginLoader {
 
 		factories.put("--fast-used-node-0.6", new FastUsedNodeFilterFactory());
 		factories.put("--fun-0.6", new FastUsedNodeFilterFactory());
+
+		factories.put("--fast-used-way", new FastUsedWayFilterFactory());
+		factories.put("--fuw", new FastUsedWayFilterFactory());
+
+		factories.put("--fast-used-way-0.6", new FastUsedWayFilterFactory());
+		factories.put("--fuw-0.6", new FastUsedWayFilterFactory());
 
 		return factories;
 	}

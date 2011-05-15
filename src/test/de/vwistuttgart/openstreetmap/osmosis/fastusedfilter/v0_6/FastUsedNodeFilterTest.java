@@ -40,10 +40,76 @@ public class FastUsedNodeFilterTest {
 	}
 	
 	@Test
+	public void shuffled() throws Exception {
+		File inFile = makeDataFile("/data/input/v0_6/inputShuffled.xml");
+		FastXmlReader reader1 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
+		FastXmlReader reader2 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
+		try {
+			WayKeyValueFilter wkvFilter = new WayKeyValueFilter("a.b");
+			SinkEntityInspector result = runFastUsedNode(reader1, reader2, wkvFilter);
+			assertCount(4, result.getProcessedEntities());
+			assertEntitiesCountByType(1, EntityType.Way, result.getProcessedEntities());
+			assertEntitiesCountByType(3, EntityType.Node, result.getProcessedEntities());
+		} finally {
+			inFile.delete();
+		}
+	}
+	
+	@Test
 	public void allEmpty() throws Exception {
 		SinkEntityInspector result = runFastUsedNode(
 				new EmptySource(), new EmptySource(), new AcceptAllFilter());
 		assertCount(0, result.getProcessedEntities());
+	}
+	
+	@Test
+	public void nodesEmpty() throws Exception {
+		File inFile = makeDataFile("/data/input/v0_6/inputBound.xml");
+		FastXmlReader reader1 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
+		try {
+			SinkEntityInspector result = runFastUsedNode(
+					new EmptySource(), reader1, new AcceptAllFilter());
+			assertCount(3, result.getProcessedEntities());
+			assertEntitiesCountByType(1, EntityType.Bound, result.getProcessedEntities());
+			assertEntitiesCountByType(2, EntityType.Way, result.getProcessedEntities());
+		} finally {
+			inFile.delete();
+		}
+	}
+	
+	@Test
+	public void waysEmpty() throws Exception {
+		File inFile = makeDataFile("/data/input/v0_6/inputBound.xml");
+		FastXmlReader reader1 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
+		try {
+			SinkEntityInspector result = runFastUsedNode(
+					reader1, new EmptySource(), new AcceptAllFilter());
+			assertCount(0, result.getProcessedEntities());
+		} finally {
+			inFile.delete();
+		}
+	}
+	
+	@Test
+	public void relation() throws Exception {
+		File inFile = makeDataFile("/data/input/v0_6/inputRelation.xml");
+		FastXmlReader reader1 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
+		FastXmlReader reader2 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
+		try {
+			SinkEntityInspector result = runFastUsedNode(reader1, reader2, new AcceptAllFilter());
+			assertCount(3, result.getProcessedEntities());
+			assertEntitiesCountByType(1, EntityType.Bound, result.getProcessedEntities());
+			assertEntitiesCountByType(1, EntityType.Relation, result.getProcessedEntities());
+			assertEntitiesCountByType(1, EntityType.Node, result.getProcessedEntities());
+		} finally {
+			inFile.delete();
+		}		
 	}
 	
 	private static void assertCount(int expected, Iterable<?> iterable) {
@@ -119,31 +185,6 @@ public class FastUsedNodeFilterTest {
 		public void run() {
 			sink.complete();
 			sink.release();
-		}
-		
-	}
-	
-	private static class RejectAllFilter implements SinkSource {
-
-		private Sink sink;
-
-		@Override
-		public void process(EntityContainer arg0) {
-		}
-
-		@Override
-		public void complete() {
-			sink.complete();
-		}
-
-		@Override
-		public void release() {
-			sink.release();
-		}
-
-		@Override
-		public void setSink(Sink sink) {
-			this.sink = sink;
 		}
 	}
 

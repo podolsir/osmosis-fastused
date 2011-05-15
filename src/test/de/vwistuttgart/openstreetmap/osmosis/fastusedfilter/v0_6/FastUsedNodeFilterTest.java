@@ -9,6 +9,8 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
+import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
 import org.openstreetmap.osmosis.core.filter.common.IdTrackerType;
 import org.openstreetmap.osmosis.tagfilter.v0_6.WayKeyValueFilter;
 import org.openstreetmap.osmosis.test.task.v0_6.SinkEntityInspector;
@@ -18,23 +20,37 @@ import org.openstreetmap.osmosis.xml.v0_6.FastXmlReader;
 public class FastUsedNodeFilterTest {
 
 	@Test
-	public void fastUsedNodeFilter() throws Exception {
+	public void standard() throws Exception {
 		File inFile = makeDataFile("/data/input/v0_6/inputBound.xml");
 		try {
 			SinkEntityInspector result = runFastUsedNode(inFile);
-			Assert.assertEquals(5,
-					iterableToList(result.getProcessedEntities()).size());
+			assertCount(5, result.getProcessedEntities());
+			assertEntitiesCountByType(1, EntityType.Bound, result.getProcessedEntities());
+			assertEntitiesCountByType(1, EntityType.Way, result.getProcessedEntities());
+			assertEntitiesCountByType(3, EntityType.Node, result.getProcessedEntities());
 		} finally {
 			inFile.delete();
 		}
 	}
 
-	private static <T> List<T> iterableToList(Iterable<T> i) {
-		List<T> list = new ArrayList<T>();
-		for (T e : i) {
-			list.add(e);
+	private static void assertCount(int expected, Iterable<?> iterable) {
+		int count = 0;
+		for (@SuppressWarnings("unused") Object obj : iterable) {
+			count++;
 		}
-		return list;
+		Assert.assertEquals(expected, count);
+	}
+	
+	private static void assertEntitiesCountByType(int expected, EntityType type, 
+			Iterable<? extends EntityContainer> iterable) {
+		int count = 0;
+		for (EntityContainer e : iterable) {
+			if (e.getEntity().getType() == type) {
+				count++;
+			}
+		}
+		
+		Assert.assertEquals(expected, count);
 	}
 
 	private SinkEntityInspector runFastUsedNode(File inFile)

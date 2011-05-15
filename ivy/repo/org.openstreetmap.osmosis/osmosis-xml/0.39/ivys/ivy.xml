@@ -22,7 +22,7 @@
     </publications>
     
     <dependencies>
-    	<dependency org="org.openstreetmap.osmosis" name="osmosis-core" rev="SNAPSHOT-rexportiert" conf="compile->default" changing="true"/>
+    	<dependency org="org.openstreetmap.osmosis" name="osmosis-core" rev="0.39" conf="compile->default" changing="true"/>
     	
     	<dependency org="commons-codec" name="commons-codec" rev="1.4" conf="compile->default"/>
         

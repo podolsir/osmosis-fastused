@@ -6,6 +6,7 @@
 
 	<!-- some variables used -->
 	<property name="lib.dir" value="lib" />
+	<property name="dist.dir" value="dist" />
 	<property name="build.dir" value="build" />
 	<property name="src.dir" value="src/main" />
 	<property name="test.src.dir" value="src/test" />
@@ -27,11 +28,26 @@
 		<path location="${build.dir}/test" />
 	</path>
 
-	
 	<path id="run.path.id">
 		<path refid="compile.path.id" />
 	</path>
 
+	<target name="_get-version" unless="${project.version}">
+		<condition property="git.command" value="git.cmd">
+			<os family="windows" />
+		</condition>
+		<condition property="git.command" value="git">
+			<not><os family="windows" /></not>
+		</condition>
+		
+		<exec executable="${git.command}" dir="${basedir}" outputproperty="git.revision" failonerror="true">
+			<arg value="log"/>
+			<arg value="--pretty=format:%h"/>
+			<arg value="-1"/>
+		</exec>
+		<property name="project.version" value="SNAPSHOT-${git.revision}" />
+	</target>
+			
 	<target name="init-ivy" unless="ivy.initialized">
 		<path id="ivy.lib.path">
 			<fileset dir="${ivy.jar.dir}" includes="*.jar" />
@@ -72,6 +88,7 @@
 		<delete dir="${build.dir}" includeemptydirs="true" />
 		<delete dir="${lib.dir}" includeemptydirs="true" />
 		<delete dir="${report.dir}" includeemptydirs="true" />
+		<delete dir="${dist.dir}" includeemptydirs="true" />
 	</target>
 
 	<!-- ================================= 
@@ -108,7 +125,7 @@
 	
 	<target name="test" depends="compile-tests">
 		<mkdir dir="report/test" />
-		<junit fork="no" maxmemory="512m" printsummary="on" haltonerror="off" haltonfailure="off" filtertrace="on" failureproperty="test.failure">
+		<junit fork="no" maxmemory="512  m" printsummary="on" haltonerror="off" haltonfailure="off" filtertrace="on" failureproperty="test.failure">
 			<formatter type="plain" usefile="true"/>
 			<formatter type="xml" usefile="true"/>
 			<classpath>
@@ -123,5 +140,12 @@
 				</fileset>
 			</batchtest>
 		</junit>
+	</target>
+	
+	<target name="jar" depends="compile,_get-version">
+		<jar destfile="${dist.dir}/${ant.project.name}-${project.version}.jar">
+			<fileset dir="${build.dir}/main">
+			</fileset>
+		</jar>
 	</target>
 </project>

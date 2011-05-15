@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-    <info organisation="org.apache" module="hello-ivy"/>
+    <info organisation="de.vwistuttgart.openstreetmap" module="osmosis-fastusedfilter"/>
     <configurations>
       <conf name="compile" description="Compiling the main source." />
       <conf name="runtime" description="Execution" extends="compile" />

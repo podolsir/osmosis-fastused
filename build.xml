@@ -7,16 +7,29 @@
 	<!-- some variables used -->
 	<property name="lib.dir" value="lib" />
 	<property name="build.dir" value="build" />
-	<property name="src.dir" value="src" />
+	<property name="src.dir" value="src/main" />
+	<property name="test.src.dir" value="src/test" />
+	
+	<property name="report.dir" value="report" />
 
 	<!-- paths used for compilation and run  -->
-	<path id="lib.path.id">
-		<fileset dir="${lib.dir}" />
+	<path id="compile.path.id">
+		<fileset dir="${lib.dir}/compile" />
 	</path>
 
+	<path id="compile.test.path.id">
+		<fileset dir="${lib.dir}/test" />
+		<path location="${build.dir}/main" />
+	</path>
+	
+	<path id="run.test.path.id">
+		<path refid="compile.test.path.id" />
+		<path location="${build.dir}/test" />
+	</path>
+
+	
 	<path id="run.path.id">
-		<path refid="lib.path.id" />
-		<path location="${build.dir}" />
+		<path refid="compile.path.id" />
 	</path>
 
 	<target name="init-ivy">
@@ -44,22 +57,16 @@
          ================================= -->
 
 	<target name="report" depends="resolve" description="--> generates a report of dependencies">
-		<ivy:report todir="${build.dir}" />
+		<ivy:report todir="${report.dir}/ivy" />
 	</target>
 
 	<!-- ================================= 
           target: clean              
          ================================= -->
 	<target name="clean" description="--> clean the project">
-		<delete includeemptydirs="true">
-
-			<fileset dir="${basedir}">
-				<exclude name="src/**" />
-				<exclude name="ivy/**" />
-				<exclude name="build.xml" />
-				<exclude name="ivy.xml" />
-			</fileset>
-		</delete>
+		<delete dir="${build.dir}" includeemptydirs="true" />
+		<delete dir="${lib.dir}" includeemptydirs="true" />
+		<delete dir="${report.dir}" includeemptydirs="true" />
 	</target>
 
 	<!-- ================================= 
@@ -68,5 +75,48 @@
 	<target name="clean-cache" depends="init-ivy" description="--> clean the ivy cache">
 
 		<ivy:cleancache />
+	</target>
+	
+	<target name="compile" depends="resolve">
+		<mkdir dir="${build.dir}/main" />
+		<javac destdir="${build.dir}/main" srcdir="${src.dir}">
+			<classpath refid="compile.path.id" /> 
+		</javac>
+		<copy todir="${build.dir}/main">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="compile-tests" depends="resolve,compile">
+		<mkdir dir="${build.dir}/test" />
+		<javac destdir="${build.dir}/test" srcdir="${test.src.dir}">
+			<classpath refid="compile.test.path.id" /> 
+		</javac>
+		<copy todir="${build.dir}/test">
+			<fileset dir="${test.src.dir}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="test" depends="compile-tests">
+		<mkdir dir="report/test" />
+		<junit fork="no" maxmemory="512m" printsummary="on" haltonerror="off" haltonfailure="off" filtertrace="on" failureproperty="test.failure">
+			<formatter type="plain" usefile="true"/>
+			<formatter type="xml" usefile="true"/>
+			<classpath>
+				<path refid="run.test.path.id"/>
+			</classpath>
+			<batchtest todir="${report.dir}/test">
+				<fileset dir="${build.dir}/test">
+					<include name="**/*Test*.class"/>
+					<exclude name="**/TestUtil.class"/>
+					<exclude name="**/*TestSuite*.class"/>
+					<exclude name="**/*$*.class"/>
+				</fileset>
+			</batchtest>
+		</junit>
 	</target>
 </project>

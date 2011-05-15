@@ -3,8 +3,6 @@ package de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import junit.framework.Assert;
 
@@ -12,6 +10,9 @@ import org.junit.Test;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
 import org.openstreetmap.osmosis.core.filter.common.IdTrackerType;
+import org.openstreetmap.osmosis.core.task.v0_6.RunnableSource;
+import org.openstreetmap.osmosis.core.task.v0_6.Sink;
+import org.openstreetmap.osmosis.core.task.v0_6.SinkSource;
 import org.openstreetmap.osmosis.tagfilter.v0_6.WayKeyValueFilter;
 import org.openstreetmap.osmosis.test.task.v0_6.SinkEntityInspector;
 import org.openstreetmap.osmosis.xml.common.CompressionMethod;
@@ -22,8 +23,13 @@ public class FastUsedNodeFilterTest {
 	@Test
 	public void standard() throws Exception {
 		File inFile = makeDataFile("/data/input/v0_6/inputBound.xml");
+		FastXmlReader reader1 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
+		FastXmlReader reader2 = new FastXmlReader(inFile, false,
+				CompressionMethod.None);
 		try {
-			SinkEntityInspector result = runFastUsedNode(inFile);
+			WayKeyValueFilter wkvFilter = new WayKeyValueFilter("a.b");
+			SinkEntityInspector result = runFastUsedNode(reader1, reader2, wkvFilter);
 			assertCount(5, result.getProcessedEntities());
 			assertEntitiesCountByType(1, EntityType.Bound, result.getProcessedEntities());
 			assertEntitiesCountByType(1, EntityType.Way, result.getProcessedEntities());
@@ -32,7 +38,14 @@ public class FastUsedNodeFilterTest {
 			inFile.delete();
 		}
 	}
-
+	
+	@Test
+	public void allEmpty() throws Exception {
+		SinkEntityInspector result = runFastUsedNode(
+				new EmptySource(), new EmptySource(), new AcceptAllFilter());
+		assertCount(0, result.getProcessedEntities());
+	}
+	
 	private static void assertCount(int expected, Iterable<?> iterable) {
 		int count = 0;
 		for (@SuppressWarnings("unused") Object obj : iterable) {
@@ -53,25 +66,21 @@ public class FastUsedNodeFilterTest {
 		Assert.assertEquals(expected, count);
 	}
 
-	private SinkEntityInspector runFastUsedNode(File inFile)
-			throws InterruptedException {
-		FastXmlReader reader1 = new FastXmlReader(inFile, false,
-				CompressionMethod.None);
-		FastXmlReader reader2 = new FastXmlReader(inFile, false,
-				CompressionMethod.None);
+	private SinkEntityInspector runFastUsedNode(RunnableSource nodeSource, 
+			RunnableSource waySource, SinkSource wayFilter)
+			throws Exception {
 
-		WayKeyValueFilter wkvFilter = new WayKeyValueFilter("a.b");
 		FastUsedNodeFilter usedFilter = new FastUsedNodeFilter(
 				IdTrackerType.IdList, 1);
 		SinkEntityInspector inspector = new SinkEntityInspector();
 
-		reader1.setSink(usedFilter.getSink(0));
-		reader2.setSink(wkvFilter);
-		wkvFilter.setSink(usedFilter.getSink(1));
+		nodeSource.setSink(usedFilter.getSink(0));
+		waySource.setSink(wayFilter);
+		wayFilter.setSink(usedFilter.getSink(1));
 		usedFilter.setSink(inspector);
 
-		Thread readerThread1 = new Thread(reader1);
-		Thread readerThread2 = new Thread(reader2);
+		Thread readerThread1 = new Thread(nodeSource);
+		Thread readerThread2 = new Thread(waySource);
 		Thread usedFilterThread = new Thread(usedFilter);
 
 		readerThread1.start();
@@ -96,4 +105,71 @@ public class FastUsedNodeFilterTest {
 		os.close();
 		return file;
 	}
+	
+	private static class EmptySource implements RunnableSource {
+
+		private Sink sink;
+		
+		@Override
+		public void setSink(Sink sink) {
+			this.sink = sink;
+		}
+
+		@Override
+		public void run() {
+			sink.complete();
+			sink.release();
+		}
+		
+	}
+	
+	private static class RejectAllFilter implements SinkSource {
+
+		private Sink sink;
+
+		@Override
+		public void process(EntityContainer arg0) {
+		}
+
+		@Override
+		public void complete() {
+			sink.complete();
+		}
+
+		@Override
+		public void release() {
+			sink.release();
+		}
+
+		@Override
+		public void setSink(Sink sink) {
+			this.sink = sink;
+		}
+	}
+
+	private static class AcceptAllFilter implements SinkSource {
+
+		private Sink sink;
+
+		@Override
+		public void process(EntityContainer entityContainer) {
+			sink.process(entityContainer);
+		}
+
+		@Override
+		public void complete() {
+			sink.complete();
+		}
+
+		@Override
+		public void release() {
+			sink.release();
+		}
+
+		@Override
+		public void setSink(Sink sink) {
+			this.sink = sink;
+		}
+	}
+
 }

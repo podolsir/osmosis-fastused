@@ -66,6 +66,7 @@ public class FastUsedWayFilter implements MultiSinkRunnableSource {
 			break;
 		case BitSet:
 			idTracker = new BitSetIdTracker();
+			break;
 		default:
 			throw new OsmosisRuntimeException("Invalid ID tracker type " + idTrackerType.toString() + " requested");
 		}

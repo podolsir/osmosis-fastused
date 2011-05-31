@@ -1,6 +1,8 @@
 // This software is released into the Public Domain.  See copying.txt for details.
 package de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6;
 
+import java.util.logging.Logger;
+
 import org.openstreetmap.osmosis.core.OsmosisRuntimeException;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
@@ -37,6 +39,8 @@ import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.impl.DataPostbo
  * @author Igor Podolskiy
  */
 public class FastUsedNodeFilter implements MultiSinkRunnableSource {
+
+	private static final Logger LOG = Logger.getLogger(FastUsedNodeFilter.class.getName());
 
 	private Sink sink;
 
@@ -111,6 +115,7 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		// while holding off nodes.
 		while (wayRelationPostbox.hasNext()) {
 			EntityContainer entityContainer = wayRelationPostbox.getNext();
+			LOG.fine(String.format("Processing entity %s from wr postbox", entityContainer.getEntity()));
 			processMaybeWay(entityContainer);
 			processMaybeRelation(entityContainer);
 			processMaybeBound(entityContainer);
@@ -119,6 +124,7 @@ public class FastUsedNodeFilter implements MultiSinkRunnableSource {
 		// Process all the nodes and only pass on what we need.
 		while (nodePostbox.hasNext()) {
 			EntityContainer entityContainer = nodePostbox.getNext();
+			LOG.fine(String.format("Processing entity %s from node postbox", entityContainer.getEntity()));
 			processMaybeNode(entityContainer);
 		}
 

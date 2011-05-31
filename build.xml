@@ -113,7 +113,7 @@
 	
 	<target name="compile-tests" depends="resolve,compile">
 		<mkdir dir="${build.dir}/test" />
-		<javac destdir="${build.dir}/test" srcdir="${test.src.dir}" debug="true">
+		<javac destdir="${build.dir}/test" srcdir="${test.src.dir}" debug="true" debuglevel="lines,vars,source">
 			<classpath refid="compile.test.path.id" /> 
 		</javac>
 		<copy todir="${build.dir}/test">

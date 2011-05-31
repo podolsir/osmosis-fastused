@@ -113,7 +113,9 @@ public class FastUsedWayFilter implements MultiSinkRunnableSource {
 		// while holding off nodes.
 		while (relationPostbox.hasNext()) {
 			EntityContainer entityContainer = relationPostbox.getNext();
-			LOG.fine(String.format("Processing entity %s from relation postbox", entityContainer.getEntity()));
+			if (false) {
+				LOG.fine(String.format("Processing entity %s from relation postbox", entityContainer.getEntity()));
+			}
 			processMaybeRelation(entityContainer);
 			processMaybeBound(entityContainer);
 			processMaybeNode(entityContainer);
@@ -122,7 +124,9 @@ public class FastUsedWayFilter implements MultiSinkRunnableSource {
 		// Process all the nodes and only pass on what we need.
 		while (wayPostbox.hasNext()) {
 			EntityContainer entityContainer = wayPostbox.getNext();
-			LOG.fine(String.format("Processing entity %s from way postbox", entityContainer.getEntity()));
+			if (false) {
+				LOG.fine(String.format("Processing entity %s from way postbox", entityContainer.getEntity()));
+			}
 			processMaybeWay(entityContainer);
 		}
 

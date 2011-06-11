@@ -38,6 +38,7 @@ import de.vwistuttgart.openstreetmap.osmosis.fastusedfilter.v0_6.impl.DataPostbo
  */
 public class FastUsedWayFilter implements MultiSinkRunnableSource {
 
+	@SuppressWarnings("unused")
 	private static final Logger LOG = Logger.getLogger(FastUsedNodeFilter.class.getName());
 
 	private Sink sink;
@@ -113,9 +114,7 @@ public class FastUsedWayFilter implements MultiSinkRunnableSource {
 		// while holding off nodes.
 		while (relationPostbox.hasNext()) {
 			EntityContainer entityContainer = relationPostbox.getNext();
-			if (false) {
-				LOG.fine(String.format("Processing entity %s from relation postbox", entityContainer.getEntity()));
-			}
+
 			processMaybeRelation(entityContainer);
 			processMaybeBound(entityContainer);
 			processMaybeNode(entityContainer);
@@ -124,9 +123,6 @@ public class FastUsedWayFilter implements MultiSinkRunnableSource {
 		// Process all the nodes and only pass on what we need.
 		while (wayPostbox.hasNext()) {
 			EntityContainer entityContainer = wayPostbox.getNext();
-			if (false) {
-				LOG.fine(String.format("Processing entity %s from way postbox", entityContainer.getEntity()));
-			}
 			processMaybeWay(entityContainer);
 		}
 

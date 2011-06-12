@@ -1,4 +1,4 @@
-<project name="osmosis-fastusedfilter" default="resolve" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="osmosis-simplifyways" default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
 	<!-- what version of ivy do we want? -->
 	<property name="ivy.install.version" value="2.2.0" />
 	<property name="ivy.jar.dir" value="${basedir}/ivy" />
@@ -40,12 +40,20 @@
 			<not><os family="windows" /></not>
 		</condition>
 		
-		<exec executable="${git.command}" dir="${basedir}" outputproperty="git.revision" failonerror="true">
-			<arg value="log"/>
-			<arg value="--pretty=format:%h"/>
-			<arg value="-1"/>
+		<exec  executable="${git.command}" dir="${basedir}" outputproperty="git.revision" 
+			failonerror="false" failifexecutionfails="false" resultproperty="git.returncode"
+			>
+			<arg value="describe"/>
+			<arg value="--always"/>
 		</exec>
-		<property name="project.version" value="SNAPSHOT-${git.revision}" />
+
+		<tstamp />
+		<condition property="project.version" 
+			value="${git.revision}" 
+			else="SNAPSHOT-${DSTAMP}">
+
+			<not><isfailure code="${git.returncode}" /></not>
+		</condition>	
 	</target>
 			
 	<target name="init-ivy" unless="ivy.initialized">
@@ -54,11 +62,6 @@
 		</path>
 		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
 		<!-- Override the shared repo location to point at the svn-based ivy repo. -->
-		<property name="ivy.shared.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact]-[revision].[ext]" />
-		<property name="ivy.shared.default.root" location="${ivy.jar.dir}/repo" />
-		<!--
-		<ivy:configure />
--->
 		<ivy:configure file="${ivy.jar.dir}/ivysettings.xml" />
 		<!-- Retrieve ivy details from the config file. -->
 		<ivy:info />
@@ -99,7 +102,7 @@
 		<ivy:cleancache />
 	</target>
 	
-	<target name="compile" depends="resolve">
+	<target name="compile" depends="resolve" description="--> compile the project">
 		<mkdir dir="${build.dir}/main" />
 		<javac destdir="${build.dir}/main" srcdir="${src.dir}">
 			<classpath refid="compile.path.id" /> 
@@ -113,7 +116,7 @@
 	
 	<target name="compile-tests" depends="resolve,compile">
 		<mkdir dir="${build.dir}/test" />
-		<javac destdir="${build.dir}/test" srcdir="${test.src.dir}" debug="true" debuglevel="lines,vars,source">
+		<javac destdir="${build.dir}/test" srcdir="${test.src.dir}">
 			<classpath refid="compile.test.path.id" /> 
 		</javac>
 		<copy todir="${build.dir}/test">
@@ -123,7 +126,7 @@
 		</copy>
 	</target>
 	
-	<target name="test" depends="compile-tests">
+	<target name="test" depends="compile-tests" description="--> compile and run the unit tests">
 		<mkdir dir="report/test" />
 		<junit fork="no" maxmemory="512  m" printsummary="on" haltonerror="off" haltonfailure="off" filtertrace="on" failureproperty="test.failure">
 			<formatter type="plain" usefile="true"/>
@@ -142,10 +145,13 @@
 		</junit>
 	</target>
 	
-	<target name="jar" depends="compile,_get-version">
+	<target name="jar" depends="compile,_get-version" description="--> create the jar file">
 		<jar destfile="${dist.dir}/${ant.project.name}-${project.version}.jar">
 			<fileset dir="${build.dir}/main">
 			</fileset>
 		</jar>
+	</target>
+	
+	<target name="dist" depends="jar" description="--> create a distribution">
 	</target>
 </project>

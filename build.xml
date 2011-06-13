@@ -1,4 +1,4 @@
-<project name="osmosis-simplifyways" default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="osmosis-fastused" default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
 	<!-- what version of ivy do we want? -->
 	<property name="ivy.install.version" value="2.2.0" />
 	<property name="ivy.jar.dir" value="${basedir}/ivy" />
